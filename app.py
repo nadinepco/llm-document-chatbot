@@ -2,12 +2,12 @@ import streamlit as st
 import time
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 def get_pdf_text(pdf_docs):
     '''Extracts text from PDF files and returns a string
@@ -30,8 +30,7 @@ def get_text_chunks(raw_text):
     Returns:
         text_chunks (list): list of text chunks
     '''
-    splitter = CharacterTextSplitter(
-        separator="\n", 
+    splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len)
@@ -67,7 +66,7 @@ def get_conversation_chain(vectorstore):
 
 def display_conversation():
     ''' Displays the chat history of the session '''
-    if len(st.session_state.chat_history) != 0:
+    if st.session_state.chat_history is not None:
         for i, message in enumerate(st.session_state.chat_history):
             if i % 2 == 0:
                 # display user input
@@ -129,7 +128,7 @@ def main():
         handle_user_input(user_question)
 
     with st.sidebar:
-        st.subheader("Document List")
+        st.title("Document List")
         pdf_docs = st.file_uploader("Upload PDF files here and click on 'Process'", type="pdf", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing..."):
