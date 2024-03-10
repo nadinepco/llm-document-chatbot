@@ -1,4 +1,4 @@
-# Chat with Multiple PDFs using Streamlit, Langchain, and OpenAI
+# 📚 Chat with Multiple PDFs using Streamlit, Langchain, and OpenAI
 This is a **Proof of Concept** of creating a Retrieval Augmented Generation (RAG) chatbot that can answer questions based on the PDF files uploaded
 
 ## Current Features:
@@ -6,6 +6,9 @@ This is a **Proof of Concept** of creating a Retrieval Augmented Generation (RAG
 - Remember the conversation
 
 ![chatbot](/images/chatbot_pdf.png)
+
+## Demo
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-document-chatbot.streamlit.app/)
 
 ## Local Setup
 1. Clone the repository
