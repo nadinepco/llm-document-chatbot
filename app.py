@@ -1,101 +1,87 @@
 import streamlit as st
-import time
-from dotenv import load_dotenv
 from sidebar import sidebar
-from utils import get_conversation_chain, get_pdf_text, get_text_chunks, get_vectorstore
+import os
+from dotenv import load_dotenv
+from app.llm_manager import LLMManager
+from app.vectorstore_manager import VectorStoreManager
+from app.chatbot import Chatbot
 
-def display_conversation():
-    ''' Displays the chat history of the session '''
-    if st.session_state.chat_history is not None:
-        for i, message in enumerate(st.session_state.chat_history):
-            if i % 2 == 0:
-                # display user input
-                with st.chat_message("user"):
-                    st.write(message.content)
-            else:
-                # display the response
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    message_placeholder.markdown(message.content)
+def get_api_key(model_type):
+    """Fetch the appropriate API key based on the model type."""
+    model_api_map = {
+        'llama3-8b-8192': "GROQ_API_KEY",
+        'mixtral-8x7b-32768': "GROQ_API_KEY",
+        'gpt-3.5-turbo-0125': "OPENAI_API_KEY"
+    }
+    if model_api_map[model_type] == "OPENAI_API_KEY":
+        return st.session_state.get("OPENAI_API_KEY", "")
+    return os.environ.get(model_api_map[model_type])
 
-def handle_user_input(user_question):
-    ''' Displays the latest input user and gets the response from the vector database
-     Args:
-        user_question: string of user input
-    '''
-    # get response from the conversation chain by retrieving from the vector database
-    response = st.session_state.conversation({'question': user_question})
+def initialize_session_state(model_type):
+    """Initialize the LLMManager with the selected model, vectorstore_manager, and chatbot"""
+    if 'llm_manager' not in st.session_state or st.session_state.model_type != model_type:
+        api_key = get_api_key(model_type)
+        st.session_state.llm_manager = LLMManager(api_key=api_key, model_type=model_type)
+        st.session_state.model_type = model_type
+        st.session_state.chatbot = Chatbot(llm=st.session_state.llm_manager.llm)
+
+    if 'vectorstore_manager' not in st.session_state:
+        st.session_state.vectorstore_manager = VectorStoreManager(openai_api_key=os.environ["OPENAI_API_KEY"])
     
-    # update the chat history session state with the latest question and response
-    st.session_state.chat_history = response['chat_history']
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+        
+def display_conversation():
+    """ Displays the chat history of the session """
+    for message in st.session_state.chatbot.chat_history:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    # display the latest question and response. The response is being displayed by chunks that will visually look like it is
-    # being typed
-    for i, message in enumerate(st.session_state.chat_history[-2:]):
-        if i % 2 == 0:
-            with st.chat_message("user"):
-                st.write(message.content)
-        else:
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                full_response = ""
-                if user_question != None:
-                    # Simulate stream of response with milliseconds delay
-                    for chunk in message.content.split():
-                        full_response += chunk + " "
-                        time.sleep(0.05)
-                        # Add a blinking cursor to simulate typing
-                        message_placeholder.markdown(full_response + "▌")
-                message_placeholder.markdown(full_response)
 
-def initialize_session_state():
-    ''' Initialize session states '''
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
 
 def main():
     st.set_page_config(page_title="Chat with your PDFs", page_icon=":books:", layout="wide")
     st.header("Chat with your PDFs :books:")
-    st.subheader("Load your PDFs and ask questions")
+    st.subheader("Load your PDFs, ask questions, and have a conversation with the chatbot")
 
-    # load .env file keys
-    # load_dotenv()
     sidebar()
-    initialize_session_state()
 
-    if not st.session_state["OPENAI_API_KEY"]:
-        st.warning(
-            "To start, please enter your OpenAI API key in the sidebar. You can get a key at"
-            " https://platform.openai.com/account/api-keys."
-        )
+    model_type = st.selectbox('Select LLM Model', list(LLMManager.MODEL_MAPPING.keys()))
+    initialize_session_state(model_type)
+
+    if model_type == 'gpt-3.5-turbo-0125' and not st.session_state.get("OPENAI_API_KEY"):
+        st.warning("To start, please enter your OpenAI API key in the sidebar. You can get a key at"
+            " https://platform.openai.com/account/api-keys.")
         st.stop()
-    
-    
-    with st.expander("Upload PDF Files"):
+
+    with st.expander("Upload PDF Files", expanded=True):
         # st.title("Document List")
         pdf_docs = st.file_uploader("Upload PDF files here and click on 'Process'", type="pdf", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing..."):
-                # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
-
-                # get text chunks
-                text_chunks = get_text_chunks(raw_text)
-
-                # create vector store
-                vectorstore = get_vectorstore(text_chunks)
-
-                # conversation chain
-                st.session_state.conversation = get_conversation_chain(vectorstore)
-    
+                print(pdf_docs)
+                retriever = st.session_state.vectorstore_manager.create_vectorstore(pdf_docs)
+                st.session_state.chatbot.create_rag_chain(retriever)
+                st.success("PDF processed!")
+        
     display_conversation()
-    if (st.session_state.conversation) is not None:
-        if user_question := st.chat_input(placeholder="Ask a question about your documents..."):
-            handle_user_input(user_question)
+    if st.session_state.chatbot.rag_chain is not None:
+        # Accept user input
+        if prompt := st.chat_input(placeholder="Ask a question about your documents..."):
+            # Display user message in chat message container
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-    
+            # Display assistant response in chat message container
+            with st.chat_message("assistant"):
+                stream = st.session_state.chatbot.get_response(prompt)
+                response = st.write_stream(stream)
+
+            # update chat history
+            st.session_state.chatbot.append_chat_history("user", prompt)
+            st.session_state.chatbot.append_chat_history("assistant", response)
+        
 
 if __name__ == "__main__":
+    load_dotenv()
     main()
