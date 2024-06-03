@@ -8,6 +8,6 @@ pypdf2==3.0.1
 python-dotenv
 streamlit==1.35.0
 tiktoken==0.5.2
-langchain_groq
-
+langchain_groq==0.0.1
+pypdf==4.2.0
 
