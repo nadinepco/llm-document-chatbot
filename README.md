@@ -7,7 +7,7 @@ This is a **Proof of Concept** of creating a Conversational Retrieval Augmented 
 - Select different models: llama3-8b-8192, mixtral-8x7b-32768, gpt-3.5-turbo-0125
 - If the question is not related to the documents, respond "I don't know"
 
-![chatbot](/images/chatbot_pdf.png)
+![chatbot](/images/chatbot.png)
 
 ## Demo
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-document-chatbot.streamlit.app/)
@@ -26,3 +26,4 @@ This is a **Proof of Concept** of creating a Conversational Retrieval Augmented 
 - [LangChain](https://langchain.readthedocs.io/en/latest/index.html)
 - [Streamlit](https://streamlit.io/)
 - FAISS
+- [Groq](https://groq.com/)
