@@ -9,5 +9,5 @@ python-dotenv
 streamlit==1.35.0
 tiktoken==0.5.2
 langchain_groq
-
-
+deepgram-sdk==3.*
+streamlit-mic-recorder
