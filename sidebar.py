@@ -24,7 +24,7 @@ def sidebar():
         st.markdown("---")
         st.markdown("# About")
         st.markdown("""
-                    This is a work in progress and is a tool to show proof of concept 
-                    that you can ask questions and have a conversation about your documents. \n
+                    This is a Proof of Concept of a Multi-Modal RAG Chatbot 
+                    that you can ask questions and have a conversation about your documents with. \n
                     [View the source code](https://github.com/nadinepco/llm-document-chatbot)
                     """)
