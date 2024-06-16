@@ -64,7 +64,7 @@ def get_chat_response(prompt):
         audio_data = st.session_state.chatbot.synthesize_text_to_speech(response)
         st.audio(
             data=audio_data,
-            format="audio/mp3",
+            format="audio/mpeg",
             autoplay=True,
         )
 
