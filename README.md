@@ -1,6 +1,6 @@
-# 📚 Conversational RAG Chatbot
+# 📚 Multi-Modal Conversational RAG Chatbot
 ## Introduction
-This is a **Proof of Concept** of creating a Conversational Retrieval Augmented Generation (RAG) chatbot that allows users to upload PDF documents and interact with the content through natural language queries. The chatbot can handle both text and voice inputs, making it versatile and user-friendly.
+This is a **Proof of Concept** of creating a Multi-Modal Conversational Retrieval Augmented Generation (RAG) chatbot that allows users to upload PDF documents and interact with the content through natural language queries. The chatbot can handle both text and voice inputs, making it versatile and user-friendly.
 
 ## Features:
 - **Document Upload:** Users can upload multiple PDF files to the chatbot.
