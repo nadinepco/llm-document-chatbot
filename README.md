@@ -23,15 +23,17 @@ This is a **Proof of Concept** of creating a Multi-Modal Conversational Retrieva
     - OpenAI API Key
     - Deepgram API Key
     - Groq API Key 
-2. Clone the repository
+2. Clone the repository <br/>
     `git clone https://github.com/nadinepco/llm-document-chatbot.git`
-3. Install the requirements file in a new environment
+3. Install the requirements file in a new environment <br/>
     `pip install -r requirements.txt`
 4. Create a .env file in the root directory and add your API key:
-    `OPENAI_API_KEY=your_openai_api_key 
+    ```
+    OPENAI_API_KEY=your_openai_api_key 
     DEEPGRAM_API_KEY=your_deepgram_api_key
-    GROQ_API_KEY=your_groq_api_key  `
-5. Start the streamlit app.
+    GROQ_API_KEY=your_groq_api_key
+    ```
+5. Start the streamlit app. <br/>
     `streamlit run app.py`
 
 ## Resources
